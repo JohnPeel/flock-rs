@@ -1,0 +1,9 @@
+[package]
+name = "bevy_test"
+version = "0.1.0"
+authors = ["John Peel <john@dgby.org>"]
+edition = "2018"
+
+[dependencies]
+bevy = "0.1"
+rand = "0.7"
