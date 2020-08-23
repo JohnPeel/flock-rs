@@ -209,7 +209,8 @@ impl FlockingPlugin {
         }
     }
 
-    fn update_flocks(time: Res<Time>, window: Res<WindowDescriptor>, params: Res<Vec<FlockParameters>>, mut query: Query<(&mut Boid, &Translation)>) {
+    fn update_flocks(time: Res<Time>, window: Res<Windows>, params: Res<Vec<FlockParameters>>, mut query: Query<(&mut Boid, &Translation)>) {
+        let window = window.get_primary().unwrap();
         let width = (window.width / 2) as f32;
         let height = (window.height / 2) as f32;
         let averages = Self::calculate_averages(params.clone(),  &mut query, width, height);
@@ -235,7 +236,11 @@ impl FlockingPlugin {
         }
     }
 
-    fn movement_system(time: Res<Time>, window: Res<WindowDescriptor>, mut query: Query<(&Boid, &mut Rotation, &mut Translation)>) {
+    fn movement_system(time: Res<Time>, window: Res<Windows>, mut query: Query<(&Boid, &mut Rotation, &mut Translation)>) {
+        let window = window.get_primary().unwrap();
+        let width = (window.width / 2) as f32;
+        let height = (window.height / 2) as f32;
+
         for (boid, mut heading, mut position) in &mut query.iter() {
             let old_position = position.0;
             position.0 += boid.velocity * time.delta_seconds;
@@ -257,7 +262,7 @@ impl FlockingPlugin {
                 }
             }
     
-            position.0 = Self::normalize_pos_to(position.0, Vec3::zero(), (window.width / 2) as f32, (window.height / 2) as f32);
+            position.0 = Self::normalize_pos_to(position.0, Vec3::zero(), width, height);
             position.0.set_z(1.0);
             *heading = Rotation::from_rotation_z(Self::calculate_heading(boid.velocity));
         }
@@ -270,7 +275,9 @@ fn main() {
             title: "Flocking Example".to_string(),
             width: 1024,
             height: 800,
-            vsync: true
+            vsync: true,
+            resizable: false,
+            ..Default::default()
         })
         .add_default_plugins()
         .add_plugin(fps_plugin::OnscreenFpsPlugin)
