@@ -90,8 +90,8 @@ impl FlockingPlugin {
         alignment
     }
     
-    fn calculate_cohesion(position: Vec3, average_position: Vec3, flock_radius: f32) -> Vec3 {
-        let mut cohesion = average_position - position;
+    fn calculate_cohesion(position: Vec3, average_position: Vec3, flock_radius: f32, width: f32, height: f32) -> Vec3 {
+        let mut cohesion = average_position - Self::normalize_pos_to(position, average_position, width, height);
     
         if cohesion.length_squared() < flock_radius * flock_radius {
             cohesion /= flock_radius;
@@ -217,7 +217,7 @@ impl FlockingPlugin {
         let height = (window.height / 2) as f32;
         for (mut boid, position) in &mut query.iter() {
             let alignment = Self::calculate_alignment(boid.max_speed, averages[boid.flock_id].average_forward);
-            let cohesion = Self::calculate_cohesion(position.0, averages[boid.flock_id].average_position, params[boid.flock_id].flock_radius);
+            let cohesion = Self::calculate_cohesion(position.0, averages[boid.flock_id].average_position, params[boid.flock_id].flock_radius, width, height);
             let separation = Self::calculate_separation(*boid, position.0, &averages[boid.flock_id].boids, width, height);
     
             let new_velocity = boid.velocity + (
