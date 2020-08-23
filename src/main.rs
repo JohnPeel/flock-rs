@@ -197,7 +197,7 @@ impl FlockingPlugin {
                         translation: Translation::new(
                             rng.gen_range(-300.0, 300.0),
                             rng.gen_range(-300.0, 300.0),
-                            1.0
+                            id as f32
                         ),
                         sprite: Sprite {
                             size: Vec2::new(8.0, 8.0)
@@ -218,21 +218,16 @@ impl FlockingPlugin {
         for (mut boid, position) in &mut query.iter() {
             let position = Self::normalize_pos_to(position.0, averages[boid.flock_id].average_position, width, height);
 
-            let alignment = Self::calculate_alignment(boid.max_speed, averages[boid.flock_id].average_forward);
-            let cohesion = Self::calculate_cohesion(position, averages[boid.flock_id].average_position, params[boid.flock_id].flock_radius);
-            let separation = Self::calculate_separation(*boid, position, &averages[boid.flock_id].boids);
-    
-            let new_velocity = boid.velocity + (
-                alignment * params[boid.flock_id].alignment_strength +
-                cohesion * params[boid.flock_id].cohesion_strength +
-                separation * params[boid.flock_id].separation_strength
-            ) * boid.max_speed * time.delta_seconds;
-            boid.velocity = new_velocity;
-    
-            if boid.velocity.length_squared() > boid.max_speed * boid.max_speed {
-                let new_velocity = boid.velocity.normalize() * boid.max_speed;
-                boid.velocity = new_velocity;
+            let alignment = Self::calculate_alignment(boid.max_speed, averages[boid.flock_id].average_forward) * params[boid.flock_id].alignment_strength;
+            let cohesion = Self::calculate_cohesion(position, averages[boid.flock_id].average_position, params[boid.flock_id].flock_radius) * params[boid.flock_id].cohesion_strength;
+            let separation = Self::calculate_separation(*boid, position, &averages[boid.flock_id].boids) * params[boid.flock_id].separation_strength;
+
+            let mut new_velocity = boid.velocity + (alignment + cohesion + separation) * boid.max_speed * time.delta_seconds;
+            if new_velocity.length_squared() > boid.max_speed * boid.max_speed {
+                new_velocity = new_velocity.normalize() * boid.max_speed;
             }
+            
+            boid.velocity = new_velocity;
         }
     }
 
@@ -263,7 +258,7 @@ impl FlockingPlugin {
             }
     
             position.0 = Self::normalize_pos_to(position.0, Vec3::zero(), width, height);
-            position.0.set_z(1.0);
+            position.0.set_z(boid.id as f32);
             *heading = Rotation::from_rotation_z(Self::calculate_heading(boid.velocity));
         }
     }
