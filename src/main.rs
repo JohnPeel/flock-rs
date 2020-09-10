@@ -177,7 +177,8 @@ impl FlockingPlugin {
                 }),
                 translation: Translation::new(0.0, 0.0, 0.0),
                 sprite: Sprite {
-                    size: Vec2::new(window.width as f32, window.height as f32)
+                    size: Vec2::new(window.width as f32, window.height as f32),
+                    resize_mode: SpriteResizeMode::Automatic,
                 },
                 ..Default::default()
             });
@@ -200,7 +201,8 @@ impl FlockingPlugin {
                             id as f32
                         ),
                         sprite: Sprite {
-                            size: Vec2::new(8.0, 8.0)
+                            size: Vec2::new(8.0, 8.0),
+                            resize_mode: SpriteResizeMode::Automatic,
                         },
                         ..Default::default()
                     })
