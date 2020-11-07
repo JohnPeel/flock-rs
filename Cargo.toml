@@ -5,5 +5,5 @@ authors = ["John Peel <john@dgby.org>"]
 edition = "2018"
 
 [dependencies]
-bevy = { git = "https://github.com/bevyengine/bevy" }
+bevy = "0.1.3"
 rand = "0.7"
