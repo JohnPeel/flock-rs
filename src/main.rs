@@ -202,7 +202,6 @@ impl FlockingPlugin {
                         ),
                         sprite: Sprite {
                             size: Vec2::new(8.0, 8.0),
-                            resize_mode: SpriteResizeMode::Automatic,
                         },
                         ..Default::default()
                     })
