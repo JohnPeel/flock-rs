@@ -25,12 +25,12 @@ impl BoundTo for Vec2 {
     type Item = Vec2;
 
     fn bound_to(self, center: Vec2, bounds: Bounds<Vec2>) -> Vec2 {
-        let mut new = Vec2::new(self.x, self.y) + center;
+        let mut new: Vec2 = Vec2::new(self.x, self.y) - center;
 
         if new.x < bounds.lower.x {
             new.x = new.x + bounds.upper.x - bounds.lower.x;
         } else if new.x > bounds.upper.x {
-            new.x = new.x - bounds.lower.x + bounds.upper.x;
+            new.x = new.x - bounds.upper.x + bounds.lower.x;
         }
 
         if new.y < bounds.lower.y {
