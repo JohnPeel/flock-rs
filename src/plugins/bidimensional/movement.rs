@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+pub const MOVEMENT_STAGE: &'static str = "MOVEMENT";
+
 #[derive(Debug, Default, PartialEq, Clone, Copy, Reflect)]
 #[reflect(Component)]
 pub struct Velocity(pub Vec2);
@@ -17,7 +19,7 @@ impl Into<Vec2> for Velocity {
 }
 
 #[derive(Clone, Debug)]
-pub struct VelocityPlugin;
+pub struct MovementPlugin;
 
 fn movement(time: Res<Time>, mut query: Query<(&mut GlobalTransform, &Velocity)>) {
     for (mut transform, velocity) in query.iter_mut() {
@@ -59,9 +61,10 @@ fn movement(time: Res<Time>, mut query: Query<(&mut GlobalTransform, &Velocity)>
     }
 }
 
-impl Plugin for VelocityPlugin {
+impl Plugin for MovementPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app
-            .add_system_to_stage(stage::POST_UPDATE, movement.system());
+            .add_stage_after(stage::POST_UPDATE, MOVEMENT_STAGE, SystemStage::serial())
+            .add_system_to_stage(MOVEMENT_STAGE, movement.system());
     }
 }
