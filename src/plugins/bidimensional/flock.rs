@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::util::*;
-use super::Velocity;
+use super::{ Velocity, movement };
 
 #[derive(Debug, Default, PartialEq, Clone, Copy, Reflect)]
 #[reflect(Component)]
@@ -11,6 +11,7 @@ pub struct FlockMemberMarker;
 #[reflect(Component)]
 pub struct FlockMemberParams {
     pub max_speed: f32,
+    pub max_accel: f32,
     pub safe_radius: f32
 }
 
@@ -34,9 +35,10 @@ impl Default for FlockMember {
     fn default() -> Self {
         FlockMember {
             marker: FlockMemberMarker,
-            velocity: Default::default(),
+            velocity: Vec2::zero().into(),
             params: FlockMemberParams {
                 max_speed: 200.0,
+                max_accel: 30.0,
                 safe_radius: 50.0
             }
         }
@@ -84,12 +86,11 @@ impl FlockingPlugin {
     }
 
     #[inline]
-    fn calculate_separation(entity: &Entity, params: &FlockMemberParams, position: Vec2, boids: &[(&Entity, Vec2, FlockMemberParams)]) -> Vec2 {
-        let entity_id = entity.id();
+    fn calculate_separation(id: u32, params: &FlockMemberParams, position: Vec2, boids: &[(u32, Vec2, FlockMemberParams)]) -> Vec2 {
         let mut separation = Vec2::zero();
 
-        for (other_entity, other_position, other_params) in boids.into_iter() {
-            if other_entity.id() != entity_id {
+        for (other_id, other_position, other_params) in boids.into_iter() {
+            if other_id != &id {
                 let difference: Vec2 = position - *other_position;
                 let distance_squared = difference.length_squared();
                 let minimum_distance = params.safe_radius + other_params.safe_radius;
@@ -125,7 +126,7 @@ impl FlockingPlugin {
 
                     average_position += transform.translation.truncate().bound_to(current_average, bounds);
                     average_forward += velocity.0;
-                    boids.push((child, transform.translation.truncate(), params.clone()));
+                    boids.push((child.id(), transform.translation.truncate(), params.clone()));
                 }
             }
 
@@ -143,14 +144,19 @@ impl FlockingPlugin {
 
                         let alignment = flock.alignment_strength * Self::calculate_alignment(params.max_speed, average_forward);
                         let cohesion = flock.cohesion_strength * Self::calculate_cohesion(position, average_position, flock.flock_radius);
-                        let separation = flock.separation_strength * Self::calculate_separation(child, params, position, &boids);
+                        let separation = flock.separation_strength * Self::calculate_separation(child.id(), params, position, &boids);
 
-                        let mut new_velocity: Vec2 = velocity.0 + params.max_speed * time.delta_seconds() * (alignment + cohesion + separation);
-                        if new_velocity.length_squared() > params.max_speed * params.max_speed {
-                            new_velocity = new_velocity.normalize() * params.max_speed;
+                        let mut acceleration: Vec2 = params.max_speed * (alignment + cohesion + separation); 
+
+                        if acceleration.length_squared() > params.max_accel * params.max_accel {
+                            acceleration = acceleration.normalize() * params.max_accel;
                         }
 
-                        velocity.0 = new_velocity;
+                        velocity.0 += acceleration * time.delta_seconds();
+
+                        if velocity.0.length_squared() > params.max_speed + params.max_speed {
+                            velocity.0 = velocity.0.normalize() * params.max_speed;
+                        }
                     }
                 }
             }
@@ -171,7 +177,7 @@ impl Plugin for FlockingPlugin {
         app.add_system(Self::flocking.system());
 
         if self.include_wrapping {
-            app.add_system_to_stage(stage::LAST, Self::wrapping.system());
+            app.add_system_to_stage(movement::MOVEMENT_STAGE, Self::wrapping.system());
         }
     }
 }

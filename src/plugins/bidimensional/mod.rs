@@ -1,6 +1,6 @@
 
-mod velocity;
+mod movement;
 mod flock;
 
-pub use velocity::*;
+pub use movement::*;
 pub use flock::*;
