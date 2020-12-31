@@ -171,7 +171,7 @@ impl Plugin for FlockingPlugin {
         app.add_system(Self::flocking.system());
 
         if self.include_wrapping {
-            app.add_system_to_stage(stage::PRE_UPDATE, Self::wrapping.system());
+            app.add_system_to_stage(stage::LAST, Self::wrapping.system());
         }
     }
 }

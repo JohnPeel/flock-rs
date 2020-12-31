@@ -16,10 +16,18 @@ native = [
 ]
 
 web = [
-  "bevy_webgl2"
+  "bevy_webgl2",
+  "web-sys",
+  "gloo-events"
 ]
 
 [dependencies]
 bevy = { version = "0.4", default-features = false }
-bevy_webgl2 = { version = "0.4", optional = true }
 rand = "0.8"
+
+bevy_webgl2 = { version = "0.4", optional = true }
+web-sys = { version = "0.3", optional = true }
+gloo-events = { version = "0.1", optional = true }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+bevy = { version = "0.4", default-features = false, features = [ "x11" ] }

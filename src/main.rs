@@ -3,7 +3,7 @@ use bevy::prelude::*;
 mod util;
 mod plugins;
 
-use plugins::{OnScreenFpsConfig, OnScreenFpsPlugin };
+use plugins::*;
 use plugins::examples::SimpleExamplePlugin;
 
 #[bevy_main]
@@ -22,7 +22,8 @@ fn main() {
         .add_plugins(DefaultPlugins);
     
     #[cfg(target_arch = "wasm32")]
-    app.add_plugin(bevy_webgl2::WebGL2Plugin);
+    app
+        .add_plugin(bevy_webgl2::WebGL2Plugin);
 
     app
         .add_plugin(OnScreenFpsPlugin::new(OnScreenFpsConfig {
