@@ -166,8 +166,9 @@ impl FlockingPlugin {
     fn wrapping(windows: Res<Windows>, mut query: Query<&mut GlobalTransform, With<FlockMemberMarker>>) {
         let bounds: Bounds<Vec2> = windows.get_primary().unwrap().into();
         for mut transform in query.iter_mut() {
-            let current_layer = transform.translation.z;
-            transform.translation = transform.translation.truncate().bound_to(Vec2::zero(), bounds).extend(current_layer);
+            transform.translation = transform.translation.truncate()
+                .bound_to(Vec2::zero(), bounds)
+                .extend(transform.translation.z);
         }
     }
 }

@@ -17,8 +17,12 @@ native = [
 
 web = [
   "bevy_webgl2",
+  "futures",
+  "wasm-bindgen",
   "web-sys",
-  "gloo-events"
+  "gloo-events",
+  "wee_alloc",
+  "console_error_panic_hook"
 ]
 
 [dependencies]
@@ -27,7 +31,16 @@ rand = "0.8"
 
 bevy_webgl2 = { version = "0.4", optional = true }
 web-sys = { version = "0.3", optional = true }
+futures = { version = "0.3", optional = true }
+wasm-bindgen = { version = "0.2", optional = true }
 gloo-events = { version = "0.1", optional = true }
+wee_alloc = { version = "0.4", optional = true }
+console_error_panic_hook = { version = "0.1", optional = true }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 bevy = { version = "0.4", default-features = false, features = [ "x11" ] }
+
+[profile.release]
+debug = 1
+lto = true
+opt-level = "z"

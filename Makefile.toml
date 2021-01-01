@@ -3,7 +3,7 @@ ENV_DIR = {source="${CARGO_MAKE_PROFILE}", default_value = "debug", mapping = {r
 CARGO_TARGET_DIR = {value = "target", condition = {env_not_set = ["CARGO_TARGET_DIR"]}}
 CARGO_WASM_PATH = "${CARGO_TARGET_DIR}/wasm32-unknown-unknown/${ENV_DIR}/${CARGO_MAKE_CRATE_NAME}.wasm"
 CARGO_PROFILE = "dev"
-TARGET_DIR = "target"
+TARGET_DIR = "dist/${ENV_DIR}"
 CARGO_MANIFEST_DIR = "${CARGO_MAKE_WORKING_DIRECTORY}"
 
 [env.release]
@@ -23,9 +23,14 @@ args = ["build", "--target", "wasm32-unknown-unknown", "--features", "web", "@@s
 command = "cargo"
 
 [tasks.build-web]
-args = ["--out-dir", "${TARGET_DIR}", "--out-name", "wasm", "--target", "web", "--no-typescript", "${CARGO_WASM_PATH}"]
+args = ["--out-dir", "${TARGET_DIR}", "--out-name", "${CARGO_MAKE_CRATE_NAME}", "--target", "web", "--no-typescript", "${CARGO_WASM_PATH}"]
 command = "wasm-bindgen"
 dependencies = ["cargo-build-web", "wasm-bindgen-cli"]
+
+[tasks.wasm-optimize]
+args = ["--dce", "-Os", "-o", "${TARGET_DIR}/${CARGO_MAKE_CRATE_NAME}_bg-optimized.wasm", "${TARGET_DIR}/${CARGO_MAKE_CRATE_NAME}_bg.wasm"]
+command = "wasm-opt"
+dependencies = ["build-web"]
 
 [tasks.build-native]
 args = ["build", "--features", "native", "@@split(CARGO_RELEASE_ARGS, )"]
@@ -38,7 +43,7 @@ dependencies = ["build-native"]
 [tasks.serve]
 command = "basic-http-server"
 args = ["-x"]
-dependencies = ["build-web", "basic-http-server"]
+dependencies = ["wasm-optimize", "basic-http-server"]
 
 [tasks.test]
 disabled = true

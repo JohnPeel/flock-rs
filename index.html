@@ -3,6 +3,9 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
     <title>Flocking Example</title>
+    <link rel="prefetch" href="assets/fonts/Inconsolata.ttf" />
+    <link rel="prefetch" href="assets/sprite/spacefield.png" />
+    <link rel="prefetch" href="assets/sprite/ship.png" />
     <style>
       html {
         height: 100vh;
@@ -23,8 +26,8 @@
   </head>
   <body>
     <script type="module">
-      import init from "./target/wasm.js";
-      init();
+      import init from "./dist/release/bevy_test.js";
+      init("./dist/release/bevy_test_bg-optimized.wasm");
     </script>
   </body>
 </html>
